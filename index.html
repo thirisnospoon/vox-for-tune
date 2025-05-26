@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Квіз «Jessidgem»</title>
+<style>
+    /* ----------  Base styles  ---------- */
+    :root{
+        --accent:#ff6b00;
+        --success:#3ac569;
+        --error:#ff4d4f;
+        --radius:1.2rem;
+        --transition:.35s ease;
+        --bg:#111827;
+        --card:#1f2937;
+        --text:#f3f4f6;
+        --muted:#9ca3af;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif;}
+    body{
+        min-height:100vh;
+        background:linear-gradient(145deg,#0f172a,#1f2937 60%);
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        color:var(--text);
+        padding:1.5rem;
+    }
+    h1{
+        font-size:clamp(1.8rem,2vw+1rem,3rem);
+        margin-bottom:1.2rem;
+        text-align:center;
+    }
+    .card{
+        width:100%;
+        max-width:500px;
+        background:var(--card);
+        border-radius:var(--radius);
+        padding:2rem 1.8rem 2.5rem;
+        box-shadow:0 20px 35px rgba(0,0,0,.45);
+        position:relative;
+        overflow:hidden;
+    }
+    p{font-size:1.1rem;text-align:center;margin-bottom:1.8rem;}
+    input[type=text]{
+        width:100%;
+        padding:.8rem 1rem;
+        border:2px solid transparent;
+        border-radius:var(--radius);
+        font-size:1rem;
+        outline:none;
+        transition:var(--transition);
+        background:#374151;
+        color:var(--text);
+    }
+    input[type=text]:focus{border-color:var(--accent);}
+    button{
+        cursor:pointer;
+        margin-top:1.2rem;
+        width:100%;
+        background:var(--accent);
+        border:none;
+        color:#fff;
+        font-weight:600;
+        font-size:1rem;
+        padding:.9rem 1rem;
+        border-radius:var(--radius);
+        transition:transform .25s ease,box-shadow .25s ease;
+    }
+    button:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,.35);}
+    button:active{transform:translateY(0);}
+    /* ----------  Animations  ---------- */
+    .flash{
+        animation:flash .6s forwards;
+    }
+    .shake{
+        animation:shake .4s linear;
+    }
+    @keyframes flash{
+        0%{background:var(--card);}
+        20%{background:var(--success);}
+        100%{background:var(--card);}
+    }
+    @keyframes shake{
+        0%,100%{transform:translateX(0);}
+        15%,45%,75%{transform:translateX(-6px);}
+        30%,60%,90%{transform:translateX(6px);}
+    }
+    /* ----------  End screen  ---------- */
+    .hidden{display:none;}
+    .link{
+        margin-top:1.5rem;
+        display:inline-block;
+        background:var(--accent);
+        color:#fff;
+        padding:.75rem 1.25rem;
+        border-radius:var(--radius);
+        text-decoration:none;
+        font-weight:600;
+        transition:var(--transition);
+    }
+    .link:hover{background:#ff8740;}
+    /* ----------  Responsive  ---------- */
+    @media(max-height:550px){
+        body{align-items:flex-start;padding-top:2rem;}
+    }
+</style>
+</head>
+<body>
+
+<div class="card" id="quiz-card">
+    <h1 id="title">Привет, педик! Ответь на все вопросы, чтобы получить ссылку на вокалы для тюна</h1>
+
+    <button id="start-btn">Начать</button>
+
+    <p id="question" class="hidden"></p>
+
+    <input type="text" id="answer-input" class="hidden" autocomplete="off" placeholder="Введи відповідь…">
+
+    <button id="answer-btn" class="hidden">Ответить</button>
+
+    <div id="final-screen" class="hidden">
+        <p style="margin-bottom:1rem;font-size:1.25rem;">🎉 Правильно! Теперь можешь забрать вокал для тюна.</p>
+        <a href="https://fex.net/ru/s/fnbkvpk" class="link" target="_blank">Шоти - вокал для тюна</a>
+    </div>
+</div>
+
+<script>
+(()=>{
+
+    const questions=[
+        {q:"Год основания группы Джессиджем?",a:["2018"]},
+        {q:"Сколько басистов было в группе Джессиджем?",a:["6"]},
+        {q:"Кто лучший гитарист группы Джессиджем?",a:["багой","макс","макс багой"]},
+        {q:"Кто главный в группе Джессиджем?",a:["андрей","андрюха","андрюша","револьвер"]},
+        {q:"Ты лох?",a:["да","так","yes"]}
+    ];
+
+    const titleEl=document.getElementById('title');
+    const questionEl=document.getElementById('question');
+    const inputEl=document.getElementById('answer-input');
+    const btnEl=document.getElementById('answer-btn');
+    const card=document.getElementById('quiz-card');
+    const finalScreen=document.getElementById('final-screen');
+    const startBtn=document.getElementById('start-btn');
+
+    let current=0;
+
+    // ----------  Start & countdown  ----------
+    startBtn.addEventListener('click',()=>{
+        startBtn.classList.add('hidden');
+        startCountdown(3);
+    });
+
+    function startCountdown(n){
+        if(n>0){
+            titleEl.textContent=n;
+            setTimeout(()=>startCountdown(n-1),1000);
+        }else{
+            showQuestion(current);
+        }
+    }
+
+    // ----------  Quiz flow  ----------
+    function showQuestion(index){
+        titleEl.classList.add('hidden');
+        questionEl.textContent=questions[index].q;
+        questionEl.classList.remove('hidden');
+        inputEl.value='';
+        inputEl.classList.remove('hidden');
+        btnEl.classList.remove('hidden');
+        inputEl.focus();
+    }
+
+    function celebrate(){
+        questionEl.classList.add('hidden');
+        inputEl.classList.add('hidden');
+        btnEl.classList.add('hidden');
+        finalScreen.classList.remove('hidden');
+    }
+
+    function mark(isCorrect){
+        card.classList.add(isCorrect?'flash':'shake');
+        setTimeout(()=>card.classList.remove(isCorrect?'flash':'shake'),400);
+    }
+
+    btnEl.addEventListener('click',submit);
+    inputEl.addEventListener('keyup',e=>{if(e.key==='Enter')submit();});
+
+    function submit(){
+        const val=inputEl.value.trim().toLowerCase();
+        if(!val)return;
+
+        const correctArr=questions[current].a;
+        const isCorrect=correctArr.includes(val);
+
+        mark(isCorrect);
+
+        if(isCorrect){
+            current++;
+            if(current<questions.length){
+                setTimeout(()=>showQuestion(current),450);
+            }else{
+                setTimeout(()=>celebrate(),450);
+            }
+        }else{
+            // Неправильно: чистимо поле
+            setTimeout(()=>{inputEl.value='';},350);
+        }
+    }
+
+})();
+</script>
+
+</body>
+</html>
